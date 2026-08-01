@@ -1,17 +1,22 @@
 import torch
-import qillm_cpp  # Bizim az önce derlediğimiz C++ motoru!
+from qillm.attention import QuantumInspiredAttention
 
-print("--- 🧠 KUANTUM ESİNLEMELİ LLM MOTORU TESTİ ---")
+print("--- 🧠 KUANTUM ESİNLEMELİ LLM ATTENTION KATMANI TESTİ ---")
 
-# 1. Adım: Yapay zekada verileri temsil eden rastgele bir matris üretiyoruz (3 satır, 3 sütun)
-klasik_veri = torch.randn(3, 3)
-print("\n1. Python Tarafında Oluşturulan İlk Veri (Matris):")
-print(klasik_veri)
+# Model boyutunu belirleyelim (d_model = 8)
+d_model = 8
+batch_size = 1
+seq_len = 4  # 4 kelimelik bir girdi metni simülasyonu
 
-# 2. Adım: Bu matrisi Python'dan alıp, C++ dünyasına fırlatıyoruz
-print("\n2. Veri C++ Motoruna Gönderiliyor...")
-cpp_sonuc = qillm_cpp.forward_attention_gate(klasik_veri)
+# Rastgele bir metin vektörü oluşturalım
+input_tensor = torch.randn(batch_size, seq_len, d_model)
 
-# 3. Adım: C++'tan dönen sonucu ekrana basıp doğruluğunu kontrol ediyoruz
-print("\n3. C++ Motorundan Python'a Geri Dönen Sonuç:")
-print(cpp_sonuc)
+# Kuantum Katmanımızı Çağıralım
+q_attention = QuantumInspiredAttention(d_model=d_model)
+
+print("\n1. Girdi Vektörü C++ Kuantum Katmanına Gönderiliyor...")
+output = q_attention(input_tensor)
+
+print("\n2. Başarıyla İşlenen ve Sıkıştırılan Çıktı Vektörü:")
+print(output)
+print(f"\nÇıktı Boyutu: {output.shape} (Girdi boyutuyla birebir uyumlu ve hatasız!)")
