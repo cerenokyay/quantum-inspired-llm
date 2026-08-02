@@ -1,48 +1,43 @@
 import torch
 from qillm.model import QILLMLanguageModel
+from qillm.tokenizer import SimpleTokenizer
 
-print("--- 🔮 KUANTUM ESİNLEMELİ LLM METİN ÜRETİMİ (INFERENCE) ---")
+print("--- 🔮 PROFESYONEL METİN ÜRETİMİ (INFERENCE FROM CHECKPOINT) ---")
 
-# 1. Konfigürasyon (Eğitimdeki boyutlarla aynı olmalı)
-vocab_size = 50
-d_model = 16
+# 1. Kaydedilmiş Modeli ve Sözlüğü Yükle
+checkpoint = torch.load("qillm_checkpoint.pt")
 
-# 2. Modeli Oluşturalım
-model = QILLMLanguageModel(vocab_size=vocab_size, d_model=d_model)
+tokenizer = SimpleTokenizer()
+tokenizer.word2id = checkpoint['word2id']
+tokenizer.id2word = checkpoint['id2word']
 
-# Not: Gerçek projelerde eğitilmiş ağırlıklar (.pt dosyası) yüklenir. 
-# Şimdilik modelin otoregresif döngüde C++ motorunu nasıl tetiklediğini simüle ediyoruz.
+model = QILLMLanguageModel(
+    vocab_size=checkpoint['vocab_size'], 
+    d_model=checkpoint['d_model'],
+    compression_rate=0.5
+)
+model.load_state_dict(checkpoint['model_state_dict'])
 model.eval()
 
-# 3. Başlangıç Kelimesi (Seed Token)
-start_token = 1
-generate_length = 8  # Üretilecek toplam kelime sayısı
+# 2. Başlangıç Kelimesi (Prompt)
+prompt = "kuantum"
+input_tokens = tokenizer.encode(prompt)
+generated_tokens = list(input_tokens)
 
-# Başlangıç dizisi [1]
-generated_sequence = [start_token]
+print(f"Girdi (Prompt): '{prompt}'")
+print("🔄 C++ SVD Motoru ile Metin Tamamlanıyor...\n")
 
-print(f"\n🌱 Başlangıç Kelime ID'si (Prompt): [{start_token}]")
-print("🔄 C++ Kuantum Motoru Otoregresif Döngüde Tetikleniyor...\n")
+# 3. Otoregresif Metin Üretimi
+generate_words = 6
 
-# 4. Metin Üretim Döngüsü
-with torch.no_grad(): # Çıkarım yaparken gradyan hesaplamaya gerek yoktur (RAM tasarrufu)
-    for step in range(generate_length):
-        # Mevcut diziyi tensör formatına getir
-        input_ids = torch.tensor([generated_sequence])
+with torch.no_grad():
+    for _ in range(generate_words):
+        input_tensor = torch.tensor([generated_tokens])
+        logits = model(input_tensor)
         
-        # İleri Besleme (C++ SVD Sıkıştırması Tetiklenir)
-        logits = model(input_ids)
-        
-        # En son üretilen kelimenin tahmin olasılıklarını al
-        next_token_logits = logits[0, -1, :]
-        
-        # En yüksek olasılıklı kelimeyi seç (Greedy Search)
-        next_token = torch.argmax(next_token_logits).item()
-        
-        # Yeni tahmin edilen kelimeyi dizinin sonuna ekle
-        generated_sequence.append(next_token)
-        
-        print(f"Adım {step+1:02d}: Tahmin Edisi [{next_token}] ---> Güncel Cümle Dizisi: {generated_sequence}")
+        next_token_id = torch.argmax(logits[0, -1, :]).item()
+        generated_tokens.append(next_token_id)
 
-print("\n✨ Üretilen Tam Kelime Dizisi:")
-print(generated_sequence)
+# 4. Sonucu Metne Çevirip Ekrana Bas
+final_text = tokenizer.decode(generated_tokens)
+print(f"✨ Üretilen Cümle: \"{final_text}\"")

@@ -2,48 +2,55 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from qillm.model import QILLMLanguageModel
+from qillm.tokenizer import SimpleTokenizer
 
-print("--- 🏋️ KUANTUM ESİNLEMELİ LLM EĞİTİM DÖNGÜSÜ ---")
+print("--- 🏋️ PROFESYONEL KUANTUM LLM EĞİTİMİ (TÜRKÇE METİN) ---")
 
-# 1. Konfigürasyon
-vocab_size = 50   # 50 kelimelik mini bir sözlük
-d_model = 16      # Vektör boyutu
-epochs = 20       # Eğitimin kaç tur döneceği
-lr = 0.01         # Öğrenme oranı (Learning Rate)
+# 1. Örnek Eğitim Metni
+sample_text = "kuantum yapay zeka donanim optimizasyonu ile gelecegin dil modellerini hizlandirir"
 
-# 2. Modeli ve Optimizatörü (AdamW) Tanımlayalım
-model = QILLMLanguageModel(vocab_size=vocab_size, d_model=d_model)
-optimizer = optim.AdamW(model.parameters(), lr=lr)
+# 2. Tokenizer'ı Kur ve Metne Göre Eğit
+tokenizer = SimpleTokenizer()
+tokenizer.fit_on_text(sample_text)
+
+print(f"Sözlük Oluşturuldu! Toplam Kelime Sayısı (Vocab Size): {tokenizer.vocab_size}")
+
+# 3. Metni Token ID'lerine Çevir
+tokens = tokenizer.encode(sample_text)
+
+# Input: "kuantum yapay zeka donanim..." -> Target: "...yapay zeka donanim optimizasyonu..."
+input_ids = torch.tensor([tokens[:-1]])
+target_ids = torch.tensor([tokens[1:]])
+
+# 4. Modeli Oluştur (Dinamik %50 Kuantum Sıkıştırma Oranı ile)
+d_model = 32
+model = QILLMLanguageModel(vocab_size=tokenizer.vocab_size, d_model=d_model, compression_rate=0.5)
+
+optimizer = optim.AdamW(model.parameters(), lr=0.01)
 criterion = nn.CrossEntropyLoss()
 
-# 3. Eğiteceğimiz Örnek Veri Seti (Target, Input'un 1 adım kaydırılmış halidir)
-# Örn: Input = [1, 2, 3, 4] -> Target = [2, 3, 4, 5]
-input_ids = torch.tensor([[1, 5, 12, 23, 40, 8]])
-target_ids = torch.tensor([[5, 12, 23, 40, 8, 15]])  # Gerçekte gelmesi gereken sonraki kelimeler
-
-print(f"Girdi Cümlesi ID'leri : {input_ids.tolist()[0]}")
-print(f"Hedef Cümle ID'leri   : {target_ids.tolist()[0]}\n")
-
-print("🚀 Eğitim Başlatılıyor...\n")
-
-# 4. Eğitim Döngüsü (Training Loop)
+# 5. Eğitim Döngüsü
+epochs = 40
 model.train()
+print("\n🚀 C++ Motoru ile Eğitim Başlatılıyor...\n")
+
 for epoch in range(1, epochs + 1):
-    optimizer.zero_grad()  # Gradient sıfırlama
-    
-    # İleri Besleme (C++ Kuantum SVD Motoru Tetikleniyor)
+    optimizer.zero_grad()
     logits = model(input_ids)
-    
-    # Hata (Loss) Hesabı
-    # logits: [Batch, Seq, Vocab] -> Reshape: [Batch * Seq, Vocab]
-    loss = criterion(logits.view(-1, vocab_size), target_ids.view(-1))
-    
-    # Geriye Yayılım ve Ağırlık Güncelleme
+    loss = criterion(logits.view(-1, tokenizer.vocab_size), target_ids.view(-1))
     loss.backward()
     optimizer.step()
     
-    # Her 5 adımda bir durumu görelim
-    if epoch % 5 == 0 or epoch == 1:
+    if epoch % 10 == 0 or epoch == 1:
         print(f"Epoch [{epoch:02d}/{epochs:02d}] ---> Kayıp (Loss): {loss.item():.4f}")
 
-print("\n✅ Eğitim Başarıyla Tamamlandı!")
+# 6. Modeli ve Tokenizer Sözlüğünü Saklama (Production Standard)
+checkpoint = {
+    'model_state_dict': model.state_dict(),
+    'vocab_size': tokenizer.vocab_size,
+    'd_model': d_model,
+    'word2id': tokenizer.word2id,
+    'id2word': tokenizer.id2word
+}
+torch.save(checkpoint, "qillm_checkpoint.pt")
+print("\n✅ Eğitilmiş Model ve Ağırlıklar 'qillm_checkpoint.pt' Olarak Kaydedildi!")

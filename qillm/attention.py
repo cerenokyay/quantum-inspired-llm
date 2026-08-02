@@ -1,33 +1,29 @@
 import torch
 import torch.nn as nn
 import math
+import qillm_cpp
 
 class QuantumInspiredAttention(nn.Module):
-    def __init__(self, d_model):
+    def __init__(self, d_model: int, compression_rate: float = 0.5):
         super().__init__()
         self.d_model = d_model
+        self.compression_rate = compression_rate
         
-        # Klasik Yapay Zeka Katmanları: Sorgu (Query), Anahtar (Key), Değer (Value) matrisleri
         self.q_linear = nn.Linear(d_model, d_model)
         self.k_linear = nn.Linear(d_model, d_model)
         self.v_linear = nn.Linear(d_model, d_model)
         
-    def forward(self, x):
-        # x: Girdi metninin vektör hali (Batch_Size, Sequence_Length, d_model)
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         B, N, D = x.shape
         
-        # 1. Adım: Klasik doğrusal dönüşümleri yapıyoruz
         Q = self.q_linear(x)
         K = self.k_linear(x)
         V = self.v_linear(x)
         
-        print(f"\n[Python AI] Klasik Dikkat (Attention) matrisleri hesaplandı. Boyut: {Q.shape}")
+        # C++ Kuantum SVD motoruna dinamik sıkıştırma oranımızı gönderiyoruz
+        compressed_attention_scores = qillm_cpp.compress_and_forward(Q, K, self.compression_rate)
         
-        # 2. Adım: Kuantum esinlemeli sıkıştırma adımı
-        # Normalde burada Q ve K matrisleri çarpılıp devasa bir NxN matrisi oluşturulur (O(N^2)).
-        # Biz bunun yerine veriyi parçalara ayırıp kuantum dalga fonksiyonu gibi simüle edeceğiz.
+        attention_weights = torch.softmax(compressed_attention_scores / math.sqrt(self.d_model), dim=-1)
+        output = torch.matmul(attention_weights, V)
         
-        # Şimdilik buradaki ağır tensör kasılma (contraction) işini bizim C++ motoruna paslayacağız.
-        # İlerleyen adımlarda C++ bunun içini kuantum matematiği ile dolduracak.
-        
-        return V # Şimdilik taslak olarak V matrisini dönüyoruz
+        return output
