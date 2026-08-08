@@ -1,5 +1,3 @@
-
-```markdown
 # ⚛️ Quantum-Inspired LLM Architecture (`qillm`)
 *A hybrid C++ / Python deep learning library leveraging Quantum Tensor Networks for LLM compression.*
 *(LLM sıkıştırması için Kuantum Tensör Ağlarını kullanan hibrit C++ / Python derin öğrenme kütüphanesi.)*
@@ -55,10 +53,6 @@ Büyük Dil Modellerindeki (LLM) "Attention" (Dikkat) mekanizmalarını sıkış
                                                        │
                                                        ▼
                                      [ Feed Forward (FFN) + LM Head ] ──> [ Next Token ]
-
-```
-
----
 
 ## 🚀 Quick Start / Hızlı Başlangıç
 

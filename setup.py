@@ -13,6 +13,7 @@ if sys.platform == 'darwin':
 
 setup(
     name='qillm_cpp',
+    version='2.0.0',
     ext_modules=[
         CppExtension(
             name='qillm_cpp',
