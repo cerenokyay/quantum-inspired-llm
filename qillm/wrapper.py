@@ -6,7 +6,11 @@ import qillm_cpp  # setup.py'de belirlediğin C++ modül adı (örn: qillm_ext)
 def compress_model(
     model: nn.Module, 
     compression_ratio: float = 0.5, 
-    target_layers: list = ["q_proj", "k_proj", "v_proj", "out_proj", "c_attn", "c_proj"]
+    #target_layers: list = ["q_proj", "k_proj", "v_proj", "out_proj", "c_attn", "c_proj"]
+    target_layers: list = [
+        "q_proj", "k_proj", "v_proj", "o_proj", # Attention
+        "up_proj", "down_proj", "gate_proj"     # MLP (Gerçek Ağırlıkların Yeri)
+    ]
 ) -> nn.Module:
     
     compressed_count = 0
