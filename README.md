@@ -1,117 +1,96 @@
-# ⚛️ Quantum-Inspired LLM Architecture (`qillm`)
-*A hybrid C++ / Python deep learning library leveraging Quantum Tensor Networks for LLM compression.*
-*(LLM sıkıştırması için Kuantum Tensör Ağlarını kullanan hibrit C++ / Python derin öğrenme kütüphanesi.)*
+
+
+# ⚛️ QILLM Studio: Quantum-Inspired LLM Optimization Platform
+
+QILLM (Quantum-Inspired Large Language Model) Studio, devasa yapay zeka modellerini (LLM) yüksek performanslı C++ motoru ile sıkıştıran, analiz eden ve akıllı stratejilerle iyileştiren uçtan uca bir model optimizasyon platformudur.
+
+Ağır matematiksel tensör işlemlerini, kullanıcı dostu ve sezgisel bir arayüzle birleştirerek yapay zeka mühendisliğini erişilebilir bir ürün deneyimine dönüştürür.
 
 ---
 
-## 🇬🇧 English Documentation
+## 🚀 Ürün Vizyonu ve Temel Özellikler
 
-A hybrid C++ / Python deep learning library that leverages **Quantum Tensor Networks (Matrix Product States)** and **Singular Value Decomposition (SVD)** to compress attention mechanisms in Large Language Models. Accelerated natively on **Apple Silicon (M-Series MPS / Accelerate Framework)**.
-
-### 🌟 Key Features
-* **C++ Native Extension**: Core Tensor Contraction and SVD Truncation implemented in C++ via PyBind11.
-* **Hardware Acceleration**: Deep integration with Apple's `Accelerate` framework for M-Series architecture.
-* **Configurable Truncation Rate**: Dynamic quantum compression ratio ($0.0 < r \le 1.0$) to balance memory footprint and model expressivity.
-* **End-to-End Pipeline**: Includes custom Tokenizer, Training Loop, Autoregressive Inference, and Checkpointing (`.pt`).
-
-### 📊 Benchmark & Trade-offs
-| Attention Layer | Compression Ratio | Primary Advantage |
-| :--- | :---: | :--- |
-| **Standard PyTorch Attention** | 0% | Fast execution for small sequences. |
-| **C++ Quantum SVD Motor** | **50%** | **Massive memory reduction & dense state compression.** |
+* **Evrensel Model Desteği (Agnostic Wrapper):** HuggingFace ekosistemindeki hazır modelleri (Örn: Llama-3, Qwen, Mistral) veya bilgisayarınızdaki yerel `.pt` / `.safetensors` dosyalarını tek tıkla sisteme entegre edebilirsiniz.
+* **Akıllı İyileştirme Motoru (Smart Recovery):** Sıkıştırma sonrası modelin zeka (PPL) kaybını analiz eder. Budama oranına ve modelin parametre boyutuna göre kullanıcıya en uygun iyileştirme yöntemini (LoRA, QLoRA veya Knowledge Distillation) otomatik olarak önerir.
+* **Canlı Çıkarım Test Alanı (Playground):** Orijinal model ile optimize edilmiş modelin üretim hızını (token/sn) ve çıktı kalitesini yan yana, gerçek zamanlı olarak test etmenize olanak tanır.
+* **Anlık Metrik Karşılaştırması:** VRAM tasarrufu, bellek ayak izi ve Perplexity (PPL) değerlerini görsel kartlar halinde sunarak maliyet/performans (trade-off) kararlarını veriye dayalı hale getirir.
+* **Yüksek Performanslı Çekirdek:** Arka planda Apple Accelerate framework'ü ile entegre çalışan, donanıma optimize edilmiş özel bir C++ SVD (Singular Value Decomposition) matris ayrıştırma motoru kullanır.
 
 ---
 
-## 🇹🇷 Türkçe Dökümantasyon
+## 🏗️ Mimari ve Teknoloji Yığını
 
-Büyük Dil Modellerindeki (LLM) "Attention" (Dikkat) mekanizmalarını sıkıştırmak için **Kuantum Tensör Ağları (Matrix Product States)** ve **Tekil Değer Ayrışımı (SVD)** kullanan hibrit bir C++ / Python derin öğrenme kütüphanesi. **Apple Silicon (M-Serisi MPS / Accelerate Framework)** üzerinde donanımsal olarak hızlandırılmıştır.
-
-### 🌟 Öne Çıkan Özellikler
-* **C++ Motoru**: Temel Tensör Büzülmesi (Contraction) ve SVD Budama işlemleri PyBind11 aracılığıyla doğrudan C++ ile yazılmıştır.
-* **Donanım Hızlandırması**: M-Serisi mimarisi için Apple'ın yerleşik `Accelerate` kütüphanesiyle derin entegrasyon.
-* **Dinamik Sıkıştırma Oranı**: Bellek ayak izi ile model doğruluğunu dengelemek için dışarıdan ayarlanabilir kuantum sıkıştırma oranı ($0.0 < r \le 1.0$).
-* **Uçtan Uca Mimari**: Özel Tokenizer, Eğitim Döngüsü, Otoregresif Metin Üretimi ve Ağırlık Kaydetme (`.pt`) süreçlerini içerir.
-
-### 📊 Performans ve Mühendislik Kazanımları
-| Katman Tipi | Sıkıştırma Oranı | Temel Avantaj |
-| :--- | :---: | :--- |
-| **Standart PyTorch Attention** | %0 | Küçük metin uzunluklarında (sequence) yüksek hız. |
-| **C++ Kuantum SVD Motoru** | **%50** | **Devasa bellek tasarrufu ve kuantum durum sıkıştırması.** |
+* **Kullanıcı Arayüzü (Frontend):** Streamlit (İnteraktif Dashboard, Dinamik Veri Akışı)
+* **API ve Sunucu (Backend):** FastAPI, Uvicorn, Pydantic (Asenkron İstek Yönetimi, Dosya Yükleme)
+* **Yapay Zeka ve Matematik Motoru:** PyTorch, Transformers, C++ (PyBind11)
+* **Donanım Optimizasyonu:** Apple Silicon (M-Series) için Accelerate Framework entegrasyonu
 
 ---
 
-## 🏗️ Architecture Overview / Mimari Genel Bakış
+## 💻 Kurulum ve Çalıştırma
 
-```text
-[ Input Text ] ──> [ Custom Tokenizer ] ──> [ Embedding + Positional Encoding ]
-                                                       │
-                                                       ▼
-                                     [ Quantum-Inspired Attention (C++) ]
-                                      ├── Q, K, V Linear Projection
-                                      ├── M-Series Accelerate SVD (S_truncated)
-                                      └── Tensor Contraction (Compress Matrix)
-                                                       │
-                                                       ▼
-                                     [ Feed Forward (FFN) + LM Head ] ──> [ Next Token ]
+Platformu kendi bilgisayarınızda çalıştırmak için aşağıdaki adımları izleyin:
 
-## 🚀 Quick Start / Hızlı Başlangıç
-
-### 1. Installation / Kurulum
-
-Clone the repository and build the C++ extension in editable mode:
-*(Projeyi klonlayın ve C++ eklentisini geliştirici modunda derleyin:)*
+**1. Depoyu Klonlayın ve Sanal Ortamı Aktif Edin**
 
 ```bash
-git clone [https://github.com/cerenokyay/quantum-inspired-llm.git](https://github.com/cerenokyay/quantum-inspired-llm.git)
+git clone https://github.com/KULLANICI_ADIN/quantum-inspired-llm.git
 cd quantum-inspired-llm
-
-# Create and activate virtual environment (Sanal ortam oluşturma ve aktivasyon)
-python3 -m venv venv
 source venv/bin/activate
 
-# Build C++ extension (C++ motorunu derleme)
-pip install -e .
-
 ```
 
-### 2. Training / Model Eğitimi
-
-Train the Quantum-LLM on custom text data:
-*(Kuantum-LLM modelini özel veri seti üzerinde eğitin:)*
+**2. Gerekli Kütüphaneleri Yükleyin**
 
 ```bash
-python train.py
+pip install -r requirements.txt
 
 ```
 
-### 3. Inference / Metin Üretimi
+*(Not: Proje içinde fastapi, uvicorn, streamlit, python-multipart ve torch kütüphanelerinin kurulu olduğundan emin olun).*
 
-Generate text autoregressively using the saved checkpoint:
-*(Kaydedilmiş ağırlıkları kullanarak otoregresif metin üretin:)*
+**3. C++ Motorunu Derleyin**
 
 ```bash
-python generate.py
+python setup.py install
 
 ```
 
-### 4. Benchmarking / Performans Testi
+**4. Sistemi Ayağa Kaldırın**
+QILLM Studio iki ayrı süreç olarak çalışır. Terminalinizde iki farklı sekme açın:
 
-Compare execution metrics between standard PyTorch and C++ Quantum SVD:
-*(Standart PyTorch ile C++ Kuantum SVD arasındaki performans metriklerini karşılaştırın:)*
+* **Sekme 1 (Arka Plan API Sunucusu):**
 
 ```bash
-python benchmark.py
+python app.py
 
 ```
+
+* **Sekme 2 (Görsel Arayüz):**
+
+```bash
+streamlit run dashboard.py
+
+```
+
+Tarayıcınızda açılan `http://localhost:8501` adresi üzerinden platformu hemen kullanmaya başlayabilirsiniz.
 
 ---
 
-## 🛠️ Tech Stack / Teknoloji Yığını
+## 🧪 Sıkıştırma ve İyileştirme Akışı
 
-* **Languages:** C++17, Python 3.10+
-* **Frameworks:** PyTorch, PyBind11, Apple Accelerate Framework
-* **Tools:** Setuptools, CMake/Make
+Sistem, kullanıcıları şu adımlarla yönlendirir:
 
-```
+1. **Analiz:** Seçilen modelin boyutu ve hedeflenen $r$ (sıkıştırma oranı) değerlendirilir. Gerekirse risk uyarısı yapılır.
+2. **Budama (SVD):** HuggingFace mimarisindeki Attention ve MLP katmanları C++ motoruna gönderilerek matris boyutları küçültülür.
+3. **Kurtarma (Recovery):** Bozulan ağırlıklar, sistemin önerdiği strateji ile (LoRA vb.) hızlıca yeniden eğitilerek zeka kaybı (PPL) geri kazanılır.
+4. **Dışa Aktarma:** Optimize edilen nihai model bilgisayara indirilmeye hazır hale gelir.
 
-```
+---
+
+## 👤 Geliştirici
+
+**Ceren Okyay**
+
+Yazılım ve Ürün Geliştirme Süreçleri | C++ & Python
+*(Bu proje, ağır mühendislik çözümlerinin kullanıcı odaklı, ölçeklenebilir ürünlere nasıl dönüştürülebileceğini göstermek amacıyla geliştirilmiştir.)*
